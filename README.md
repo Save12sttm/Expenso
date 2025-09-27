@@ -164,41 +164,17 @@
 
 <div align="center">
 
-### 🌅 **Light Theme Experience**
-<table>
-<tr>
-<td align="center">
-<img src="https://via.placeholder.com/280x500/E3F2FD/1976D2?text=📊+Dashboard+Light" alt="Dashboard Light" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"/>
-<br><b>Dashboard</b>
-</td>
-<td align="center">
-<img src="https://via.placeholder.com/280x500/E8F5E8/388E3C?text=💳+Transactions+Light" alt="Transactions Light" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"/>
-<br><b>Transactions</b>
-</td>
-<td align="center">
-<img src="https://via.placeholder.com/280x500/FFF3E0/F57C00?text=➕+Add+Transaction" alt="Add Transaction" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"/>
-<br><b>Add Transaction</b>
-</td>
-</tr>
-</table>
+### 🌅 **Light Theme**
 
-### 🌙 **Dark Theme Experience**
-<table>
-<tr>
-<td align="center">
-<img src="https://via.placeholder.com/280x500/121212/BB86FC?text=📊+Dashboard+Dark" alt="Dashboard Dark" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"/>
-<br><b>Dashboard</b>
-</td>
-<td align="center">
-<img src="https://via.placeholder.com/280x500/121212/03DAC6?text=💳+Transactions+Dark" alt="Transactions Dark" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"/>
-<br><b>Transactions</b>
-</td>
-<td align="center">
-<img src="https://via.placeholder.com/280x500/121212/FF6B6B?text=➕+Add+Dark" alt="Add Dark" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);"/>
-<br><b>Add Transaction</b>
-</td>
-</tr>
-</table>
+| Dashboard Light | Transactions Light | Add Transaction Light |
+|-----------------|--------------------|-----------------------|
+| ![Dashboard Light](assets/screenshots/dashboard_light.jpeg) | ![Transactions Light](assets/screenshots/transaction_light.jpeg) | ![Add Transaction Light](assets/screenshots/add_transaction_light.jpeg) |
+
+### 🌙 **Dark Theme**
+
+| Dashboard Dark | Transactions Dark | Add Transaction Dark |
+|----------------|-------------------|----------------------|
+| ![Dashboard Dark](assets/screenshots/dashboard_dark.jpeg) | ![Transactions Dark](assets/screenshots/transaction_dark.jpeg) | ![Add Transaction Dark](assets/screenshots/add_transaction_dark.jpeg) |
 
 </div>
 
