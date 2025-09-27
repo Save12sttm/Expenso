@@ -168,13 +168,13 @@
 
 | Dashboard Light | Transactions Light | Add Transaction Light |
 |-----------------|--------------------|-----------------------|
-| ![Dashboard Light](assets/screenshots/dashboard_light.jpeg) | ![Transactions Light](assets/screenshots/transaction_light.jpeg) | ![Add Transaction Light](assets/screenshots/add_transaction_light.jpeg) |
+| ![Dashboard Light](https://raw.githubusercontent.com/Save12sttm/Expenso/main/assets/screenshots/dashboard%20light.jpeg) | ![Transactions Light](https://raw.githubusercontent.com/Save12sttm/Expenso/main/assets/screenshots/transaction%20light.jpeg) | ![Add Transaction Light](https://raw.githubusercontent.com/Save12sttm/Expenso/main/assets/screenshots/add%20transaction%20light.jpeg) |
 
 ### 🌙 **Dark Theme**
 
 | Dashboard Dark | Transactions Dark | Add Transaction Dark |
 |----------------|-------------------|----------------------|
-| ![Dashboard Dark](assets/screenshots/dashboard_dark.jpeg) | ![Transactions Dark](assets/screenshots/transaction_dark.jpeg) | ![Add Transaction Dark](assets/screenshots/add_transaction_dark.jpeg) |
+| ![Dashboard Dark](https://raw.githubusercontent.com/Save12sttm/Expenso/main/assets/screenshots/dashboard%20dark.jpeg) | ![Transactions Dark](https://raw.githubusercontent.com/Save12sttm/Expenso/main/assets/screenshots/transaction%20dark.jpeg) | ![Add Transaction Dark](https://raw.githubusercontent.com/Save12sttm/Expenso/main/assets/screenshots/add%20transaction%20dark.jpeg) |
 
 </div>
 
