@@ -14,7 +14,7 @@ Thank you for your interest in contributing to Expenso! This document provides g
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/yourusername/expenso.git
+   git clone https://github.com/Save12sttm/Expenso.git
    cd expenso
    ```
 
@@ -139,7 +139,7 @@ docs(readme): update installation instructions
 
 - **GitHub Discussions:** For general questions
 - **Issues:** For bugs and feature requests
-- **Email:** your.email@example.com
+- **GitHub Issues:** https://github.com/Save12sttm/Expenso/issues
 
 ## 🏆 Recognition
 

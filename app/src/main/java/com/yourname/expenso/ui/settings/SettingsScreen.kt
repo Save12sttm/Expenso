@@ -399,11 +399,11 @@ fun ModernEditProfileDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 
-                // Email Field
+                // Email Field (Optional)
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    label = { Text("Email") },
+                    label = { Text("Email (Optional)") },
                     leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -412,7 +412,7 @@ fun ModernEditProfileDialog(
         confirmButton = {
             Button(
                 onClick = { onSave(name, email, selectedAvatar) },
-                enabled = name.isNotBlank() && email.isNotBlank()
+                enabled = name.isNotBlank()
             ) {
                 Text("Save Changes")
             }

@@ -49,26 +49,49 @@ class TransactionRepository @Inject constructor(
     suspend fun updateAccount(account: Account) = accountDao.updateAccount(account)
     suspend fun transferMoney(fromAccountId: Int, toAccountId: Int, amount: Double) = 
         accountDao.transfer(fromAccountId, toAccountId, amount)
+    
+    suspend fun updateAccountBalance(accountName: String, amount: Double, transactionType: String) {
+        val account = accountDao.getAccountByName(accountName)
+        account?.let {
+            val newBalance = if (transactionType == "Income") {
+                it.balance + amount
+            } else {
+                it.balance - amount
+            }
+            accountDao.updateAccount(it.copy(balance = newBalance))
+        }
+    }
 
     // Initialize default data
     suspend fun initializeDefaultData() {
-        val defaultCategories = listOf(
-            Category(name = "Food", icon = "🍽️"),
-            Category(name = "Transport", icon = "🚗"),
-            Category(name = "Shopping", icon = "🛒"),
-            Category(name = "Bills", icon = "💡"),
-            Category(name = "Entertainment", icon = "🎬"),
-            Category(name = "Health", icon = "🏥"),
-            Category(name = "General", icon = "📝")
-        )
-        defaultCategories.forEach { categoryDao.insertCategory(it) }
-        
-        val defaultAccounts = listOf(
-            Account(name = "Cash", balance = 5000.0, type = "Cash"),
-            Account(name = "Bank", balance = 25000.0, type = "Bank"),
-            Account(name = "Credit Card", balance = -2500.0, type = "Credit")
-        )
-        defaultAccounts.forEach { accountDao.insertAccount(it) }
+        // Check if accounts already exist to prevent duplicates
+        try {
+            val accountCount = accountDao.getAccountCount()
+            if (accountCount == 0) {
+                val defaultAccounts = listOf(
+                    Account(name = "Cash", balance = 5000.0, type = "Cash"),
+                    Account(name = "Bank", balance = 25000.0, type = "Bank"),
+                    Account(name = "UPI", balance = 10000.0, type = "UPI")
+                )
+                defaultAccounts.forEach { accountDao.insertAccount(it) }
+            }
+            
+            val categoryCount = categoryDao.getCategoryCount()
+            if (categoryCount == 0) {
+                val defaultCategories = listOf(
+                    Category(name = "Food", icon = "🍽️"),
+                    Category(name = "Transport", icon = "🚗"),
+                    Category(name = "Shopping", icon = "🛒"),
+                    Category(name = "Bills", icon = "💡"),
+                    Category(name = "Entertainment", icon = "🎬"),
+                    Category(name = "Health", icon = "🏥"),
+                    Category(name = "General", icon = "📝")
+                )
+                defaultCategories.forEach { categoryDao.insertCategory(it) }
+            }
+        } catch (e: Exception) {
+            // Ignore errors during initialization
+        }
     }
 
     // Backup & Restore Methods

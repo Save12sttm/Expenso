@@ -33,4 +33,10 @@ interface AccountDao {
 
     @Query("DELETE FROM accounts")
     suspend fun deleteAllAccounts()
+    
+    @Query("SELECT COUNT(*) FROM accounts")
+    suspend fun getAccountCount(): Int
+    
+    @Query("SELECT * FROM accounts WHERE name = :accountName LIMIT 1")
+    suspend fun getAccountByName(accountName: String): Account?
 }

@@ -117,12 +117,14 @@ fun DashboardScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             "Recent Activity",
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
                         TextButton(onClick = { navController.navigate("transactions") }) {
                             Text("View All")
@@ -131,7 +133,7 @@ fun DashboardScreen(
                 }
                 
                 // Recent Transactions
-                items(uiState.transactions.take(6)) { transaction ->
+                items(uiState.transactions.take(5)) { transaction ->
                     TransactionItem(transaction, viewModel::softDeleteTransaction)
                 }
             }
@@ -154,7 +156,8 @@ fun BalanceCard(uiState: DashboardUiState, modifier: Modifier = Modifier) {
             Text(
                 "₹${String.format("%.0f", uiState.balance)}",
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF008000)
             )
         }
     }
@@ -326,27 +329,46 @@ fun MonthSelector(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionItem(transaction: Transaction, onDelete: (Transaction) -> Unit) {
-    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("dd MMM", Locale.getDefault()) }
     val amountColor = if (transaction.type == "Income") Color(0xFF008000) else Color.Red
     var showDeleteDialog by remember { mutableStateOf(false) }
     
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .combinedClickable(
                 onLongClick = { showDeleteDialog = true }
-            ) {}
-            .padding(vertical = 8.dp)
+            ) {},
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(transaction.title, style = MaterialTheme.typography.bodyLarge)
-            Text(dateFormat.format(Date(transaction.date)), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    text = dateFormat.format(Date(transaction.date)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = String.format("₹%.0f", transaction.amount),
+                color = amountColor,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
         }
-        Text(
-            String.format("₹%.2f", transaction.amount),
-            color = amountColor,
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
     
     if (showDeleteDialog) {

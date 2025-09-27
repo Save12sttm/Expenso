@@ -1,11 +1,15 @@
 package com.yourname.expenso.ui.add_transaction
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -19,19 +23,40 @@ private fun isAmountValid(amount: String): Boolean {
     return amount.toDoubleOrNull()?.let { it > 0 } ?: false
 }
 
+private fun getCategoryEmoji(category: String): String {
+    return when (category) {
+        "Food" -> "🍽️"
+        "Transport" -> "🚗"
+        "Shopping" -> "🛍️"
+        "Bills" -> "💵"
+        "Entertainment" -> "🎬"
+        "General" -> "📝"
+        else -> "💰"
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionScreen(
     navController: NavController,
     viewModel: AddTransactionViewModel = hiltViewModel()
 ) {
+    val accounts by viewModel.accounts.collectAsState(initial = emptyList())
+    
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var transactionType by remember { mutableStateOf("Expense") }
     var category by remember { mutableStateOf("General") }
     var expandedCategory by remember { mutableStateOf(false) }
-    var selectedAccount by remember { mutableStateOf("Cash") }
+    var selectedAccount by remember { mutableStateOf("") }
     var expandedAccount by remember { mutableStateOf(false) }
+    
+    // Set first account as default when accounts load
+    LaunchedEffect(accounts) {
+        if (accounts.isNotEmpty() && selectedAccount.isEmpty()) {
+            selectedAccount = accounts.first().name
+        }
+    }
     
     // Auto-categorization
     LaunchedEffect(title) {
@@ -49,7 +74,6 @@ fun AddTransactionScreen(
     }
     
     val categories = listOf("Food", "Transport", "Shopping", "Bills", "Entertainment", "General")
-    val accounts = listOf("Cash", "Bank", "Credit Card")
     // Note: title is now optional, only amount is required
 
     Scaffold(
@@ -102,64 +126,124 @@ fun AddTransactionScreen(
             )
             
             // 3. Account Selection
-            ExposedDropdownMenuBox(
-                expanded = expandedAccount,
-                onExpandedChange = { expandedAccount = !expandedAccount }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(1.dp)
             ) {
-                OutlinedTextField(
-                    value = selectedAccount,
-                    onValueChange = { },
-                    readOnly = true,
-                    label = { Text("Account") },
-                    trailingIcon = {
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedAccount,
-                    onDismissRequest = { expandedAccount = false }
-                ) {
-                    accounts.forEach { accountOption ->
-                        DropdownMenuItem(
-                            text = { Text(accountOption) },
-                            onClick = {
-                                selectedAccount = accountOption
-                                expandedAccount = false
-                            }
+                Box {
+                    OutlinedTextField(
+                        value = if (selectedAccount.isNotEmpty()) selectedAccount else "Select Account",
+                        onValueChange = { },
+                        readOnly = true,
+                        label = { Text("Account") },
+                        trailingIcon = {
+                            Icon(
+                                if (expandedAccount) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                modifier = Modifier.clickable { expandedAccount = !expandedAccount }
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { expandedAccount = !expandedAccount },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
                         )
+                    )
+                    DropdownMenu(
+                        expanded = expandedAccount,
+                        onDismissRequest = { expandedAccount = false },
+                        modifier = Modifier.fillMaxWidth(0.9f)
+                    ) {
+                        accounts.forEach { account ->
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column {
+                                            Text(
+                                                account.name,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Text(
+                                                account.type,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Text(
+                                            "₹${String.format("%.0f", account.balance)}",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (account.balance >= 0) Color(0xFF008000) else Color.Red
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    selectedAccount = account.name
+                                    expandedAccount = false
+                                }
+                            )
+                        }
                     }
                 }
             }
             
             // 4. Category Selection (only for expenses)
             if (transactionType == "Expense") {
-                ExposedDropdownMenuBox(
-                    expanded = expandedCategory,
-                    onExpandedChange = { expandedCategory = !expandedCategory }
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(1.dp)
                 ) {
-                    OutlinedTextField(
-                        value = category,
-                        onValueChange = { },
-                        readOnly = true,
-                        label = { Text("Category") },
-                        trailingIcon = {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expandedCategory,
-                        onDismissRequest = { expandedCategory = false }
-                    ) {
-                        categories.forEach { categoryOption ->
-                            DropdownMenuItem(
-                                text = { Text(categoryOption) },
-                                onClick = {
-                                    category = categoryOption
-                                    expandedCategory = false
-                                }
+                    Box {
+                        OutlinedTextField(
+                            value = category,
+                            onValueChange = { },
+                            readOnly = true,
+                            label = { Text("Category") },
+                            trailingIcon = {
+                                Icon(
+                                    Icons.Default.ArrowDropDown,
+                                    contentDescription = null,
+                                    modifier = Modifier.clickable { expandedCategory = !expandedCategory }
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { expandedCategory = !expandedCategory },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary
                             )
+                        )
+                        DropdownMenu(
+                            expanded = expandedCategory,
+                            onDismissRequest = { expandedCategory = false },
+                            modifier = Modifier.fillMaxWidth(0.9f)
+                        ) {
+                            categories.forEach { categoryOption ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                getCategoryEmoji(categoryOption),
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Text(
+                                                categoryOption,
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        category = categoryOption
+                                        expandedCategory = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -189,10 +273,10 @@ fun AddTransactionScreen(
                         accountId = 1,  // Default account ID
                         date = System.currentTimeMillis()
                     )
-                    viewModel.addTransaction(newTransaction)
+                    viewModel.addTransaction(newTransaction, selectedAccount)
                     navController.popBackStack()
                 },
-                enabled = isAmountValid(amount),
+                enabled = isAmountValid(amount) && selectedAccount.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Save Transaction")
