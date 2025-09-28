@@ -39,6 +39,10 @@ fun AppNavHost(
         composable("settings") {
             SettingsScreen(navController = navController)
         }
+        composable("add_transaction/{type}") { backStackEntry ->
+            val type = backStackEntry.arguments?.getString("type") ?: "expense"
+            AddTransactionScreen(navController = navController, initialType = type)
+        }
         composable("add_transaction") {
             AddTransactionScreen(navController = navController)
         }

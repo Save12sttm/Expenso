@@ -14,6 +14,7 @@ class AddTransactionViewModel @Inject constructor(
 ) : ViewModel() {
 
     val accounts = repository.getAllAccounts()
+    val categories = repository.getAllCategories()
 
     fun addTransaction(transaction: Transaction, selectedAccountName: String) {
         viewModelScope.launch {
@@ -22,6 +23,12 @@ class AddTransactionViewModel @Inject constructor(
             
             // Update account balance
             repository.updateAccountBalance(selectedAccountName, transaction.amount, transaction.type)
+        }
+    }
+    
+    fun initializeData() {
+        viewModelScope.launch {
+            repository.initializeDefaultData()
         }
     }
 }

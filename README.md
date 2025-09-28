@@ -33,6 +33,27 @@
 
 ---
 
+## 🚀 **Get Expenso Now**
+
+<div align="center">
+
+### 📲 **Download the Latest APK**
+
+<a href="https://github.com/Save12sttm/Expenso/releases">
+  <img src="https://img.shields.io/badge/Download%20APK-2196F3?style=for-the-badge&logo=android&logoColor=white" alt="Download APK"/>
+</a>
+
+**No Google Play Store needed - Direct APK installation**
+
+<p>
+<img src="https://img.shields.io/github/v/release/Save12sttm/Expenso?style=flat-square&label=Latest%20Release&color=3DDC84" alt="Latest Release"/>
+<img src="https://img.shields.io/github/downloads/Save12sttm/Expenso/total?style=flat-square&label=Downloads&color=FF6B6B" alt="Total Downloads"/>
+</p>
+
+</div>
+
+---
+
 ## 🌟 **Why Expenso?**
 
 <table>
@@ -57,6 +78,37 @@
 </td>
 </tr>
 </table>
+
+---
+
+## 📲 **Quick Download**
+
+<div align="center">
+
+### 🚀 **Get Expenso Instantly**
+
+<table>
+<tr>
+<td align="center">
+<a href="https://github.com/Save12sttm/Expenso/releases">
+  <img src="https://img.shields.io/badge/📱%20Download%20APK-2196F3?style=for-the-badge&logo=android&logoColor=white" alt="Download APK"/>
+</a>
+<br><b>Latest Release</b>
+<br>Direct APK Download
+</td>
+<td align="center">
+<a href="https://github.com/Save12sttm/Expenso/releases">
+  <img src="https://img.shields.io/github/v/release/Save12sttm/Expenso?style=for-the-badge&logo=github&logoColor=white&color=3DDC84" alt="GitHub Release"/>
+</a>
+<br><b>Version Information</b>
+<br>Always Up-to-Date
+</td>
+</tr>
+</table>
+
+**No Google Play Store required - Install directly on your Android device**
+
+</div>
 
 ---
 
@@ -188,7 +240,7 @@
 
 </div>
 
-```mermaid
+```
 graph TB
     subgraph "🎨 Presentation Layer"
         A[MainActivity] --> B[MainAppScaffold]
@@ -260,7 +312,7 @@ graph TB
 <details>
 <summary><b>📦 Key Dependencies</b></summary>
 
-```kotlin
+```
 // 🎨 UI & Compose
 implementation("androidx.compose.material3:material3")
 implementation("androidx.navigation:navigation-compose")
@@ -314,7 +366,7 @@ implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android")
 
 ### 🛠️ **Installation Steps**
 
-```bash
+```
 # 1️⃣ Clone the repository
 git clone https://github.com/Save12sttm/Expenso.git
 cd Expenso
@@ -571,7 +623,7 @@ See the [LICENSE](LICENSE) file for details.
 <p>
 <a href="https://github.com/Save12sttm/Expenso/issues"><img alt="Issues" src="https://img.shields.io/badge/Report%20Bug-FF6B6B?style=for-the-badge&logo=bug&logoColor=white"/></a>
 <a href="https://github.com/Save12sttm/Expenso/discussions"><img alt="Discussions" src="https://img.shields.io/badge/Discussions-4CAF50?style=for-the-badge&logo=chat&logoColor=white"/></a>
-<a href="https://github.com/Save12sttm/Expenso/releases"><img alt="Releases" src="https://img.shields.io/badge/Releases-2196F3?style=for-the-badge&logo=rocket&logoColor=white"/></a>
+<a href="https://github.com/Save12sttm/Expenso/releases"><img alt="Releases" src="https://img.shields.io/badge/Download%20APK-2196F3?style=for-the-badge&logo=android&logoColor=white"/></a>
 </p>
 
 </div>

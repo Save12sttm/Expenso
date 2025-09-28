@@ -55,15 +55,6 @@ fun ReportsScreen(
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            // Generate and save PDF report
-                        }
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Download PDF")
-                    }
                 }
             )
         }
@@ -115,14 +106,6 @@ fun ReportsScreen(
             
             item {
                 DailySpendingCard(monthlyTransactions)
-            }
-            
-            item {
-                PDFExportCard(
-                    onGeneratePDF = {
-                        // Generate PDF report for current month
-                    }
-                )
             }
         }
     }
@@ -325,58 +308,6 @@ fun DailySpendingCard(transactions: List<com.yourname.expenso.model.Transaction>
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun PDFExportCard(onGeneratePDF: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            
-            Spacer(Modifier.height(8.dp))
-            
-            Text(
-                "Export Monthly Report",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Text(
-                "Generate a detailed PDF report with all transactions and analytics",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            
-            Button(
-                onClick = onGeneratePDF,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Generate PDF Report")
-            }
-            
-            Spacer(Modifier.height(8.dp))
-            
-            Text(
-                "PDF will be saved to Downloads folder",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

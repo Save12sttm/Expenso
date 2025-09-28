@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.yourname.expenso.data.AccountDao
 import com.yourname.expenso.data.AppDatabase
+import com.yourname.expenso.data.AppPreferencesManager
 import com.yourname.expenso.data.CategoryDao
 import com.yourname.expenso.data.TransactionDao
 import com.yourname.expenso.data.TransactionRepository
@@ -54,5 +55,11 @@ object AppModule {
         accountDao: AccountDao
     ): TransactionRepository {
         return TransactionRepository(transactionDao, categoryDao, accountDao)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideAppPreferencesManager(@ApplicationContext context: Context): AppPreferencesManager {
+        return AppPreferencesManager(context)
     }
 }

@@ -33,6 +33,11 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showResetDialog by remember { mutableStateOf(false) }
     
+    // Profile data
+    val profileName by viewModel.profileName.collectAsState(initial = "John Doe")
+    val profileEmail by viewModel.profileEmail.collectAsState(initial = "john.doe@example.com")
+    val profileAvatar by viewModel.profileAvatar.collectAsState(initial = "Person")
+    
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
 
@@ -52,7 +57,18 @@ fun SettingsScreen(
             modifier = Modifier.padding(paddingValues),
             contentPadding = PaddingValues(horizontal = if (isTablet) 32.dp else 0.dp)
         ) {
-            item { ProfileSection() }
+            item { 
+                ProfileSection(
+                    profileName = profileName,
+                    profileEmail = profileEmail,
+                    profileAvatar = profileAvatar,
+                    onProfileUpdate = { name, email, avatar ->
+                        viewModel.setProfileName(name)
+                        viewModel.setProfileEmail(email)
+                        viewModel.setProfileAvatar(avatar)
+                    }
+                ) 
+            }
             
             item { SettingsSectionHeader("💰 Financial Management") }
             item { SettingsActionItem("📊 Manage Categories") { navController.navigate("manage_categories") } }
@@ -102,11 +118,23 @@ fun SettingsScreen(
 }
 
 @Composable
-fun ProfileSection() {
+fun ProfileSection(
+    profileName: String,
+    profileEmail: String,
+    profileAvatar: String,
+    onProfileUpdate: (String, String, String) -> Unit
+) {
     var showEditDialog by remember { mutableStateOf(false) }
-    var userName by remember { mutableStateOf("John Doe") }
-    var userEmail by remember { mutableStateOf("john.doe@example.com") }
-    var selectedAvatar by remember { mutableStateOf(Icons.Default.Person) }
+    var userName by remember { mutableStateOf(profileName) }
+    var userEmail by remember { mutableStateOf(profileEmail) }
+    var selectedAvatar by remember { mutableStateOf(profileAvatar) }
+    
+    // Update local state when profile data changes
+    LaunchedEffect(profileName, profileEmail, profileAvatar) {
+        userName = profileName
+        userEmail = profileEmail
+        selectedAvatar = profileAvatar
+    }
     
     Card(
         modifier = Modifier
@@ -131,7 +159,14 @@ fun ProfileSection() {
                         modifier = Modifier.fillMaxSize()
                     ) {
                         Icon(
-                            selectedAvatar,
+                            when(selectedAvatar) {
+                                "Person" -> Icons.Default.Person
+                                "AccountCircle" -> Icons.Default.AccountCircle
+                                "Face" -> Icons.Default.Face
+                                "Star" -> Icons.Default.Star
+                                "Favorite" -> Icons.Default.Favorite
+                                else -> Icons.Default.Person
+                            },
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
                             tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -182,12 +217,27 @@ fun ProfileSection() {
         ModernEditProfileDialog(
             currentName = userName,
             currentEmail = userEmail,
-            currentAvatar = selectedAvatar,
+            currentAvatar = when(selectedAvatar) {
+                "Person" -> Icons.Default.Person
+                "AccountCircle" -> Icons.Default.AccountCircle
+                "Face" -> Icons.Default.Face
+                "Star" -> Icons.Default.Star
+                "Favorite" -> Icons.Default.Favorite
+                else -> Icons.Default.Person
+            },
             onDismiss = { showEditDialog = false },
             onSave = { name, email, avatar ->
                 userName = name
                 userEmail = email
-                selectedAvatar = avatar
+                selectedAvatar = when(avatar) {
+                    Icons.Default.Person -> "Person"
+                    Icons.Default.AccountCircle -> "AccountCircle"
+                    Icons.Default.Face -> "Face"
+                    Icons.Default.Star -> "Star"
+                    Icons.Default.Favorite -> "Favorite"
+                    else -> "Person"
+                }
+                onProfileUpdate(name, email, selectedAvatar)
                 showEditDialog = false
             }
         )

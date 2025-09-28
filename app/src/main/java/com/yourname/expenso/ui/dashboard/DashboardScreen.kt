@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -44,7 +45,6 @@ fun DashboardScreen(
     var selectedMonth by remember { mutableStateOf(Calendar.getInstance().get(Calendar.MONTH)) }
     var selectedYear by remember { mutableStateOf(Calendar.getInstance().get(Calendar.YEAR)) }
     
-    // Simplified without export notification
 
     Scaffold(
         topBar = {
@@ -69,7 +69,13 @@ fun DashboardScreen(
                 }
             )
         },
-
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate("add_transaction/expense") }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
+            }
+        }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -134,14 +140,17 @@ fun DashboardScreen(
                 
                 // Recent Transactions
                 items(uiState.transactions.take(5)) { transaction ->
-                    TransactionItem(transaction, viewModel::softDeleteTransaction)
+                    TransactionItem(
+                        transaction = transaction,
+                        onDelete = viewModel::softDeleteTransaction,
+                        onEdit = viewModel::updateTransaction
+                    )
                 }
             }
             
 
         }
         
-        // Export notifications removed for simplicity
     }
 }
 
@@ -256,8 +265,8 @@ fun QuickActionsRow(navController: androidx.navigation.NavController) {
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            QuickActionButton("💸", "Expense") { navController.navigate("add_transaction") }
-            QuickActionButton("💰", "Income") { navController.navigate("add_transaction") }
+            QuickActionButton("💸", "Expense") { navController.navigate("add_transaction/expense") }
+            QuickActionButton("💰", "Income") { navController.navigate("add_transaction/income") }
             QuickActionButton("📊", "Reports") { navController.navigate("reports") }
             QuickActionButton("⚙️", "Settings") { navController.navigate("settings") }
         }
@@ -328,18 +337,24 @@ fun MonthSelector(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TransactionItem(transaction: Transaction, onDelete: (Transaction) -> Unit) {
+fun TransactionItem(
+    transaction: Transaction,
+    onDelete: (Transaction) -> Unit,
+    onEdit: (Transaction) -> Unit
+) {
     val dateFormat = remember { SimpleDateFormat("dd MMM", Locale.getDefault()) }
     val amountColor = if (transaction.type == "Income") Color(0xFF008000) else Color.Red
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
     
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
             .combinedClickable(
+                onClick = { showEditDialog = true },
                 onLongClick = { showDeleteDialog = true }
-            ) {},
+            ),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Row(
@@ -362,12 +377,23 @@ fun TransactionItem(transaction: Transaction, onDelete: (Transaction) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Text(
-                text = String.format("₹%.0f", transaction.amount),
-                color = amountColor,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = String.format("₹%.0f", transaction.amount),
+                    color = amountColor,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.width(8.dp))
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit transaction",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
     
@@ -393,6 +419,20 @@ fun TransactionItem(transaction: Transaction, onDelete: (Transaction) -> Unit) {
             }
         )
     }
+    
+    if (showEditDialog) {
+        // We'll implement this properly in the Transactions screen where we have access to accounts and categories
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Edit Transaction") },
+            text = { Text("Editing is available in the Transactions screen. Tap on a transaction in the Transactions screen to edit it.") },
+            confirmButton = {
+                TextButton(onClick = { showEditDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -408,8 +448,8 @@ fun QuickActionsRowTablet(navController: androidx.navigation.NavController) {
                 .padding(24.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            QuickActionButtonTablet("💸", "Add Expense") { navController.navigate("add_transaction") }
-            QuickActionButtonTablet("💰", "Add Income") { navController.navigate("add_transaction") }
+            QuickActionButtonTablet("💸", "Add Expense") { navController.navigate("add_transaction/expense") }
+            QuickActionButtonTablet("💰", "Add Income") { navController.navigate("add_transaction/income") }
             QuickActionButtonTablet("📆", "View Reports") { navController.navigate("reports") }
             QuickActionButtonTablet("⚙️", "Settings") { navController.navigate("settings") }
         }
@@ -438,4 +478,3 @@ private fun getCurrentMonthYear(): String {
     val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
     return dateFormat.format(Date())
 }
-

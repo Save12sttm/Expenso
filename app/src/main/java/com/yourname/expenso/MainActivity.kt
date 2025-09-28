@@ -10,11 +10,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.lifecycleScope
 import com.yourname.expenso.data.AppTheme
-import com.yourname.expenso.data.ThemeManager
+import com.yourname.expenso.data.AppPreferencesManager
 import com.yourname.expenso.data.TransactionRepository
 import com.yourname.expenso.ui.MainAppScaffold
 import com.yourname.expenso.ui.theme.ExpensoTheme
-import com.yourname.expenso.util.MonthlyExportScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,23 +23,18 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var themeManager: ThemeManager
+    lateinit var themeManager: AppPreferencesManager
     
     @Inject
     lateinit var repository: TransactionRepository
     
-    @Inject
-    lateinit var monthlyExportScheduler: MonthlyExportScheduler
-    
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize default data and schedule exports
+        // Initialize default data
         lifecycleScope.launch {
             repository.initializeDefaultData()
-            monthlyExportScheduler.scheduleMonthlyExport()
         }
         setContent {
             val theme by themeManager.theme.collectAsState(initial = AppTheme.SYSTEM)

@@ -1,11 +1,14 @@
 package com.yourname.expenso.ui.transactions
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -16,10 +19,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yourname.expenso.ui.dashboard.DashboardViewModel
-import com.yourname.expenso.ui.dashboard.TransactionItem
+import com.yourname.expenso.ui.dashboard.EditTransactionDialog
 import com.yourname.expenso.model.Transaction
+import java.text.SimpleDateFormat
+import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsScreen(
     navController: NavController,
@@ -32,6 +37,7 @@ fun TransactionsScreen(
     var isMultiSelectMode by remember { mutableStateOf(false) }
     var selectedTransactions by remember { mutableStateOf(setOf<Int>()) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var transactionToEdit by remember { mutableStateOf<Transaction?>(null) }
     
     val filteredTransactions = uiState.transactions.filter { transaction ->
         val matchesSearch = transaction.title.contains(searchQuery, ignoreCase = true)
@@ -159,7 +165,8 @@ fun TransactionsScreen(
                                 selectedTransactions - transaction.id
                             }
                         },
-                        onDelete = { viewModel.softDeleteTransaction(it) }
+                        onDelete = { viewModel.softDeleteTransaction(it) },
+                        onEdit = { transactionToEdit = it }
                     )
                 }
                 
@@ -198,6 +205,19 @@ fun TransactionsScreen(
                 onDismiss = { showDeleteDialog = false }
             )
         }
+        
+        transactionToEdit?.let { transaction ->
+            EditTransactionDialog(
+                transaction = transaction,
+                accounts = uiState.accounts,
+                categories = uiState.categories,
+                onDismiss = { transactionToEdit = null },
+                onUpdate = { updatedTransaction ->
+                    viewModel.updateTransaction(updatedTransaction)
+                    transactionToEdit = null
+                }
+            )
+        }
     }
 }
 
@@ -207,7 +227,8 @@ fun MultiSelectTransactionItem(
     isMultiSelectMode: Boolean,
     isSelected: Boolean,
     onSelectionChanged: (Boolean) -> Unit,
-    onDelete: (Transaction) -> Unit
+    onDelete: (Transaction) -> Unit,
+    onEdit: (Transaction) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -221,8 +242,100 @@ fun MultiSelectTransactionItem(
             )
         }
         Box(modifier = Modifier.weight(1f)) {
-            TransactionItem(transaction, onDelete)
+            TransactionItemWithEdit(
+                transaction = transaction,
+                onDelete = onDelete,
+                onEdit = onEdit
+            )
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TransactionItemWithEdit(
+    transaction: Transaction,
+    onDelete: (Transaction) -> Unit,
+    onEdit: (Transaction) -> Unit
+) {
+    val dateFormat = remember { SimpleDateFormat("dd MMM", Locale.getDefault()) }
+    val amountColor = if (transaction.type == "Income") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .combinedClickable(
+                onClick = { onEdit(transaction) },
+                onLongClick = { showDeleteDialog = true }
+            ),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    text = dateFormat.format(Date(transaction.date)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = String.format("₹%.0f", transaction.amount),
+                    color = amountColor,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                )
+                IconButton(
+                    onClick = { onEdit(transaction) },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+    }
+    
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Transaction") },
+            text = { Text("Move '${transaction.title}' to recycle bin?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete(transaction)
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

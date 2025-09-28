@@ -8,10 +8,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.foundation.background
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,27 +47,54 @@ fun ManageCategoriesScreen(
         }
     ) { padding ->
         LazyColumn(modifier = Modifier.padding(padding)) {
+            item {
+                Text(
+                    "Tap on a category to edit it. Swipe to delete.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            
             items(categories) { category ->
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clickable { 
+                            // TODO: Implement category editing in future
+                        },
+                    elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val iconData = when(category.icon) {
-                            else -> Icons.Default.Star
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = MaterialTheme.shapes.medium
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                getCategoryEmoji(category.name),
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
-                        Icon(
-                            imageVector = iconData,
-                            contentDescription = category.icon,
-                            modifier = Modifier.padding(end = 12.dp)
-                        )
+                        
+                        Spacer(modifier = Modifier.width(12.dp))
+                        
                         Text(
                             text = category.name,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.weight(1f)
                         )
+                        
                         IconButton(
                             onClick = { categoryToDelete = category }
                         ) {
@@ -94,7 +123,17 @@ fun ManageCategoriesScreen(
             AlertDialog(
                 onDismissRequest = { categoryToDelete = null },
                 title = { Text("Delete Category") },
-                text = { Text("Are you sure you want to delete '${category.name}'? This action cannot be undone.") },
+                text = { 
+                    Column {
+                        Text("Are you sure you want to delete '${category.name}'?") 
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Note: Existing transactions with this category will not be affected.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -119,20 +158,10 @@ fun ManageCategoriesScreen(
 @Composable
 fun AddCategoryDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
     var name by remember { mutableStateOf("") }
-    var selectedIconIndex by remember { mutableStateOf(0) }
+    var selectedIcon by remember { mutableStateOf("⭐") }
     
-    data class CategoryIcon(val icon: ImageVector, val name: String)
-    val icons = listOf(
-        CategoryIcon(Icons.Default.Star, "Restaurant"),
-        CategoryIcon(Icons.Default.Star, "Transport"),
-        CategoryIcon(Icons.Default.Star, "Shopping"),
-        CategoryIcon(Icons.Default.Star, "Money"),
-        CategoryIcon(Icons.Default.Star, "Entertainment"),
-        CategoryIcon(Icons.Default.Star, "General"),
-        CategoryIcon(Icons.Default.Star, "Home"),
-        CategoryIcon(Icons.Default.Star, "Health"),
-        CategoryIcon(Icons.Default.Star, "Education"),
-        CategoryIcon(Icons.Default.Star, "Work")
+    val iconOptions = listOf(
+        "⭐" to "Star"
     )
     
     AlertDialog(
@@ -149,23 +178,31 @@ fun AddCategoryDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Select Icon:", style = MaterialTheme.typography.bodyMedium)
                 LazyRow(modifier = Modifier.padding(top = 8.dp)) {
-                    items(icons.size) { index ->
-                        val iconData = icons[index]
+                    items(iconOptions) { (icon, label) ->
                         Card(
                             modifier = Modifier
                                 .padding(4.dp)
-                                .clickable { selectedIconIndex = index },
+                                .clickable { selectedIcon = icon },
                             colors = CardDefaults.cardColors(
-                                containerColor = if (selectedIconIndex == index) 
+                                containerColor = if (selectedIcon == icon) 
                                     MaterialTheme.colorScheme.primaryContainer 
                                 else MaterialTheme.colorScheme.surface
-                            )
+                            ),
+                            elevation = CardDefaults.cardElevation(2.dp)
                         ) {
-                            Icon(
-                                imageVector = iconData.icon,
-                                contentDescription = iconData.name,
-                                modifier = Modifier.padding(12.dp)
-                            )
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    icon,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
                 }
@@ -173,7 +210,11 @@ fun AddCategoryDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(name, icons[selectedIconIndex].name) },
+                onClick = { 
+                    if (name.isNotBlank()) {
+                        onConfirm(name, selectedIcon)
+                    }
+                },
                 enabled = name.isNotBlank()
             ) {
                 Text("Add")
@@ -185,4 +226,19 @@ fun AddCategoryDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit
             }
         }
     )
+}
+
+private fun getCategoryEmoji(categoryName: String): String {
+    return when {
+        categoryName.contains("food", ignoreCase = true) -> "🍽️"
+        categoryName.contains("transport", ignoreCase = true) -> "🚗"
+        categoryName.contains("shop", ignoreCase = true) -> "🛍️"
+        categoryName.contains("bill", ignoreCase = true) -> "💡"
+        categoryName.contains("enter", ignoreCase = true) -> "🎬"
+        categoryName.contains("health", ignoreCase = true) -> "🏥"
+        categoryName.contains("home", ignoreCase = true) -> "🏠"
+        categoryName.contains("work", ignoreCase = true) -> "💼"
+        categoryName.contains("edu", ignoreCase = true) -> "🎓"
+        else -> "💰"
+    }
 }

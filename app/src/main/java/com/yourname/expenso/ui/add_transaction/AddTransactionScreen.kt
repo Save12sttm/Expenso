@@ -6,6 +6,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+
+
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -24,13 +26,13 @@ private fun isAmountValid(amount: String): Boolean {
 }
 
 private fun getCategoryEmoji(category: String): String {
-    return when (category) {
-        "Food" -> "🍽️"
-        "Transport" -> "🚗"
-        "Shopping" -> "🛍️"
-        "Bills" -> "💵"
-        "Entertainment" -> "🎬"
-        "General" -> "📝"
+    return when {
+        category.contains("food", ignoreCase = true) -> "🍽️"
+        category.contains("transport", ignoreCase = true) -> "🚗"
+        category.contains("shop", ignoreCase = true) -> "🛍️"
+        category.contains("bill", ignoreCase = true) -> "💵"
+        category.contains("enter", ignoreCase = true) -> "🎬"
+        category.contains("health", ignoreCase = true) -> "🏥"
         else -> "💰"
     }
 }
@@ -39,17 +41,20 @@ private fun getCategoryEmoji(category: String): String {
 @Composable
 fun AddTransactionScreen(
     navController: NavController,
+    initialType: String = "expense",
     viewModel: AddTransactionViewModel = hiltViewModel()
 ) {
     val accounts by viewModel.accounts.collectAsState(initial = emptyList())
+    val categories by viewModel.categories.collectAsState(initial = emptyList())
     
     var title by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var transactionType by remember { mutableStateOf("Expense") }
+    var transactionType by remember { mutableStateOf(if (initialType == "income") "Income" else "Expense") }
     var category by remember { mutableStateOf("General") }
     var expandedCategory by remember { mutableStateOf(false) }
     var selectedAccount by remember { mutableStateOf("") }
     var expandedAccount by remember { mutableStateOf(false) }
+    var isSaving by remember { mutableStateOf(false) }
     
     // Set first account as default when accounts load
     LaunchedEffect(accounts) {
@@ -58,22 +63,36 @@ fun AddTransactionScreen(
         }
     }
     
+    // Initialize default data and set first category
+    LaunchedEffect(Unit) {
+        viewModel.initializeData()
+    }
+    
+    LaunchedEffect(categories) {
+        if (categories.isNotEmpty() && category == "General") {
+            category = categories.first().name
+        }
+    }
+    
     // Auto-categorization
     LaunchedEffect(title) {
-        if (title.isNotBlank() && transactionType == "Expense") {
+        if (title.isNotBlank() && transactionType == "Expense" && categories.isNotEmpty()) {
             category = when {
                 title.contains("food", ignoreCase = true) || 
-                title.contains("restaurant", ignoreCase = true) -> "Food"
+                title.contains("restaurant", ignoreCase = true) -> 
+                    categories.find { it.name.contains("Food", ignoreCase = true) }?.name ?: categories.first().name
                 title.contains("uber", ignoreCase = true) || 
-                title.contains("taxi", ignoreCase = true) -> "Transport"
-                title.contains("shop", ignoreCase = true) -> "Shopping"
-                title.contains("movie", ignoreCase = true) -> "Entertainment"
-                else -> "General"
+                title.contains("taxi", ignoreCase = true) -> 
+                    categories.find { it.name.contains("Transport", ignoreCase = true) }?.name ?: categories.first().name
+                title.contains("shop", ignoreCase = true) -> 
+                    categories.find { it.name.contains("Shopping", ignoreCase = true) }?.name ?: categories.first().name
+                title.contains("movie", ignoreCase = true) -> 
+                    categories.find { it.name.contains("Entertainment", ignoreCase = true) }?.name ?: categories.first().name
+                else -> categories.first().name
             }
         }
     }
     
-    val categories = listOf("Food", "Transport", "Shopping", "Bills", "Entertainment", "General")
     // Note: title is now optional, only amount is required
 
     Scaffold(
@@ -98,15 +117,34 @@ fun AddTransactionScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(if (isTablet) 24.dp else 16.dp)
         ) {
-            // 1. Amount - Primary field
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text("Amount (₹)") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                isError = amount.isNotEmpty() && !isAmountValid(amount),
-                modifier = Modifier.fillMaxWidth()
-            )
+            // 1. Amount - Primary field with enhanced styling
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(4.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)
+                )
+            ) {
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount (₹)", fontWeight = FontWeight.Bold) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    isError = amount.isNotEmpty() && !isAmountValid(amount),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    textStyle = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    supportingText = {
+                        if (amount.isNotEmpty() && !isAmountValid(amount)) {
+                            Text(
+                                "Please enter a valid amount",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        } else {
+                            Text("Enter the transaction amount", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                )
+            }
             
             // 2. Note - Optional with smart categorization
             OutlinedTextField(
@@ -116,7 +154,7 @@ fun AddTransactionScreen(
                 supportingText = {
                     if (title.isNotBlank() && transactionType == "Expense") {
                         Text(
-                            "Auto-categorized as: $category",
+                            "Auto-categorized as: ${getCategoryEmoji(category)} $category",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -128,7 +166,7 @@ fun AddTransactionScreen(
             // 3. Account Selection
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(1.dp)
+                elevation = CardDefaults.cardElevation(2.dp)
             ) {
                 Box {
                     OutlinedTextField(
@@ -138,7 +176,7 @@ fun AddTransactionScreen(
                         label = { Text("Account") },
                         trailingIcon = {
                             Icon(
-                                if (expandedAccount) Icons.Default.ArrowDropDown else Icons.Default.ArrowDropDown,
+                                Icons.Default.ArrowDropDown,
                                 contentDescription = null,
                                 modifier = Modifier.clickable { expandedAccount = !expandedAccount }
                             )
@@ -178,7 +216,7 @@ fun AddTransactionScreen(
                                             "₹${String.format("%.0f", account.balance)}",
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (account.balance >= 0) Color(0xFF008000) else Color.Red
+                                            color = if (account.balance >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                                         )
                                     }
                                 },
@@ -196,11 +234,14 @@ fun AddTransactionScreen(
             if (transactionType == "Expense") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(1.dp)
+                    elevation = CardDefaults.cardElevation(2.dp)
                 ) {
                     Box {
                         OutlinedTextField(
-                            value = category,
+                            value = if (categories.isNotEmpty()) {
+                                val selectedCategory = categories.find { it.name == category }
+                                "${selectedCategory?.icon ?: getCategoryEmoji(category)} $category"
+                            } else "Loading categories...",
                             onValueChange = { },
                             readOnly = true,
                             label = { Text("Category") },
@@ -223,26 +264,34 @@ fun AddTransactionScreen(
                             onDismissRequest = { expandedCategory = false },
                             modifier = Modifier.fillMaxWidth(0.9f)
                         ) {
-                            categories.forEach { categoryOption ->
+                            if (categories.isEmpty()) {
                                 DropdownMenuItem(
-                                    text = {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(
-                                                getCategoryEmoji(categoryOption),
-                                                style = MaterialTheme.typography.titleMedium
-                                            )
-                                            Spacer(modifier = Modifier.width(12.dp))
-                                            Text(
-                                                categoryOption,
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        category = categoryOption
-                                        expandedCategory = false
-                                    }
+                                    text = { Text("No categories available") },
+                                    onClick = { }
                                 )
+                            } else {
+                                categories.forEach { categoryOption ->
+                                    DropdownMenuItem(
+                                        text = {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(
+                                                    categoryOption.icon ?: getCategoryEmoji(categoryOption.name),
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    categoryOption.name,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = if (category == categoryOption.name) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            category = categoryOption.name
+                                            expandedCategory = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -250,36 +299,87 @@ fun AddTransactionScreen(
             }
             
             // 5. Type Selection
-            Row {
-                RadioButton(
-                    selected = transactionType == "Expense",
-                    onClick = { transactionType = "Expense" }
-                )
-                Text("Expense", modifier = Modifier.padding(start = 4.dp, end = 16.dp))
-                RadioButton(
-                    selected = transactionType == "Income",
-                    onClick = { transactionType = "Income" }
-                )
-                Text("Income", modifier = Modifier.padding(start = 4.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        "Transaction Type",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        FilterChip(
+                            onClick = { transactionType = "Expense" },
+                            label = { Text("Expense") },
+                            selected = transactionType == "Expense",
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = if (transactionType == "Expense") 
+                                    MaterialTheme.colorScheme.errorContainer 
+                                else MaterialTheme.colorScheme.surface,
+                                labelColor = if (transactionType == "Expense") 
+                                    MaterialTheme.colorScheme.onErrorContainer 
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                        FilterChip(
+                            onClick = { transactionType = "Income" },
+                            label = { Text("Income") },
+                            selected = transactionType == "Income",
+                            colors = FilterChipDefaults.filterChipColors(
+                                containerColor = if (transactionType == "Income") 
+                                    MaterialTheme.colorScheme.primaryContainer 
+                                else MaterialTheme.colorScheme.surface,
+                                labelColor = if (transactionType == "Income") 
+                                    MaterialTheme.colorScheme.onPrimaryContainer 
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                    }
+                }
             }
             
             Button(
                 onClick = {
-                    val newTransaction = Transaction(
-                        title = if (title.isBlank()) "${transactionType} - ${amount}" else title,
-                        amount = amount.toDouble(),
-                        type = transactionType,
-                        categoryId = 1, // Default category ID
-                        accountId = 1,  // Default account ID
-                        date = System.currentTimeMillis()
-                    )
-                    viewModel.addTransaction(newTransaction, selectedAccount)
-                    navController.popBackStack()
+                    if (!isSaving) {
+                        isSaving = true
+                        val newTransaction = Transaction(
+                            title = if (title.isBlank()) "${transactionType} - ₹${amount}" else title,
+                            amount = amount.toDouble(),
+                            type = transactionType,
+                            categoryId = categories.find { it.name == category }?.id ?: 1,
+                            accountId = accounts.find { it.name == selectedAccount }?.id ?: 1,
+                            date = System.currentTimeMillis()
+                        )
+                        viewModel.addTransaction(newTransaction, selectedAccount)
+                        navController.popBackStack()
+                    }
                 },
-                enabled = isAmountValid(amount) && selectedAccount.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth()
+                enabled = isAmountValid(amount) && selectedAccount.isNotEmpty() && categories.isNotEmpty() && !isSaving,
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (transactionType == "Expense") 
+                        MaterialTheme.colorScheme.error 
+                    else MaterialTheme.colorScheme.primary,
+                    contentColor = if (transactionType == "Expense") 
+                        MaterialTheme.colorScheme.onError 
+                    else MaterialTheme.colorScheme.onPrimary
+                )
             ) {
-                Text("Save Transaction")
+                if (isSaving) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(
+                    if (isSaving) "Saving..." else "Save ${transactionType} ₹${amount.ifBlank { "0" }}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

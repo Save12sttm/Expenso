@@ -7,10 +7,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -50,41 +53,103 @@ fun ManageAccountsScreen(
         Column(modifier = Modifier.padding(padding)) {
             Button(
                 onClick = { showTransferDialog = true },
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                enabled = accounts.size >= 2
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                enabled = accounts.size >= 2,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
                 Text("Transfer Money")
             }
             
-            LazyColumn {
-                items(accounts) { account ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .clickable { accountToEdit = account }
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
+            if (accounts.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "No accounts yet",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Add your first account to get started",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            } else {
+                LazyColumn {
+                    item {
+                        Text(
+                            "Tap on an account to edit its balance. Swipe to delete.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    
+                    items(accounts) { account ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                .clickable { accountToEdit = account },
+                            elevation = CardDefaults.cardElevation(2.dp)
                         ) {
-                            Column {
-                                Text(account.name, style = MaterialTheme.typography.bodyLarge)
-                                Text(account.type, style = MaterialTheme.typography.bodySmall)
-                            }
-                            Row {
-                                Text(
-                                    String.format("₹%.2f", account.balance),
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
-                                IconButton(
-                                    onClick = { accountToDelete = account }
-                                ) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Delete Account",
-                                        tint = MaterialTheme.colorScheme.error
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+                                    Text(
+                                        account.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier.padding(bottom = 4.dp)
                                     )
+                                    Text(
+                                        account.type,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        String.format("₹%.2f", account.balance),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = if (account.balance >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    IconButton(
+                                        onClick = { accountToDelete = account }
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete Account",
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -129,7 +194,17 @@ fun ManageAccountsScreen(
             AlertDialog(
                 onDismissRequest = { accountToDelete = null },
                 title = { Text("Delete Account") },
-                text = { Text("Are you sure you want to delete '${account.name}'? This action cannot be undone.") },
+                text = { 
+                    Column {
+                        Text("Are you sure you want to delete '${account.name}'?") 
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            "Note: Existing transactions for this account will not be affected.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -163,13 +238,21 @@ fun EditAccountBalanceDialog(
         onDismissRequest = onDismiss,
         title = { Text("Edit Balance: ${account.name}") },
         text = {
-            OutlinedTextField(
-                value = balance,
-                onValueChange = { balance = it },
-                label = { Text("New Balance (₹)") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column {
+                OutlinedTextField(
+                    value = balance,
+                    onValueChange = { balance = it },
+                    label = { Text("New Balance (₹)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Current balance: ₹${String.format("%.2f", account.balance)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         },
         confirmButton = {
             Button(
@@ -196,8 +279,9 @@ fun EditAccountBalanceDialog(
 fun AddAccountDialog(onDismiss: () -> Unit, onConfirm: (String, Double, String) -> Unit) {
     var name by remember { mutableStateOf("") }
     var balance by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf("Bank") }
-    val types = listOf("Bank", "Cash", "UPI")
+    var type by remember { mutableStateOf("") }
+    var expandedType by remember { mutableStateOf(false) }
+    val types = listOf("Bank", "Cash", "UPI", "Credit Card", "Investment", "Other")
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -207,22 +291,47 @@ fun AddAccountDialog(onDismiss: () -> Unit, onConfirm: (String, Double, String) 
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Account Name") }
+                    label = { Text("Account Name") },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = balance,
                     onValueChange = { balance = it },
                     label = { Text("Initial Balance") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Row {
-                    types.forEach { accountType ->
-                        Row {
-                            RadioButton(
-                                selected = type == accountType,
-                                onClick = { type = accountType }
+                // Type selection with dropdown
+                Box {
+                    OutlinedTextField(
+                        value = if (type.isNotEmpty()) type else "Select Account Type",
+                        onValueChange = { },
+                        readOnly = true,
+                        label = { Text("Account Type") },
+                        trailingIcon = {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                modifier = Modifier.clickable { expandedType = !expandedType }
                             )
-                            Text(accountType)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { expandedType = !expandedType }
+                    )
+                    DropdownMenu(
+                        expanded = expandedType,
+                        onDismissRequest = { expandedType = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        types.forEach { accountType ->
+                            DropdownMenuItem(
+                                text = { Text(accountType) },
+                                onClick = {
+                                    type = accountType
+                                    expandedType = false
+                                }
+                            )
                         }
                     }
                 }
@@ -230,8 +339,12 @@ fun AddAccountDialog(onDismiss: () -> Unit, onConfirm: (String, Double, String) 
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(name, balance.toDoubleOrNull() ?: 0.0, type) },
-                enabled = name.isNotBlank() && balance.toDoubleOrNull() != null
+                onClick = { 
+                    if (name.isNotBlank() && balance.toDoubleOrNull() != null && type.isNotEmpty()) {
+                        onConfirm(name, balance.toDoubleOrNull() ?: 0.0, type)
+                    }
+                },
+                enabled = name.isNotBlank() && balance.toDoubleOrNull() != null && type.isNotEmpty()
             ) {
                 Text("Add")
             }
@@ -259,33 +372,74 @@ fun TransferMoneyDialog(
         title = { Text("Transfer Money") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("From Account:")
+                Text(
+                    "From Account:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
                 accounts.forEach { account ->
-                    Row {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { fromAccount = account }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         RadioButton(
                             selected = fromAccount == account,
                             onClick = { fromAccount = account }
                         )
-                        Text("${account.name} (₹${String.format("%.2f", account.balance)})")
+                        Column(modifier = Modifier.padding(start = 8.dp)) {
+                            Text(
+                                account.name,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                "₹${String.format("%.2f", account.balance)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
-                Text("To Account:")
+                
+                Spacer(Modifier.height(8.dp))
+                
+                Text(
+                    "To Account:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
                 accounts.forEach { account ->
                     if (account != fromAccount) {
-                        Row {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { toAccount = account }
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             RadioButton(
                                 selected = toAccount == account,
                                 onClick = { toAccount = account }
                             )
-                            Text(account.name)
+                            Text(
+                                account.name,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(start = 8.dp)
+                            )
                         }
                     }
                 }
+                
+                Spacer(Modifier.height(8.dp))
+                
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
                     label = { Text("Amount") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         },

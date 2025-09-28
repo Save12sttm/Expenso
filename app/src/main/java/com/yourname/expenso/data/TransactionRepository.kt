@@ -94,23 +94,10 @@ class TransactionRepository @Inject constructor(
         }
     }
 
-    // Backup & Restore Methods
     suspend fun clearAllData() {
         transactionDao.deleteAllTransactions()
         categoryDao.deleteAllCategories()
         accountDao.deleteAllAccounts()
         initializeDefaultData()
-    }
-
-    suspend fun restoreFromBackup(
-        transactions: List<Transaction>,
-        categories: List<Category>,
-        accounts: List<Account>
-    ) {
-        // Clear existing data and restore in a single transaction
-        clearAllData()
-        categories.forEach { categoryDao.insertCategory(it) }
-        accounts.forEach { accountDao.insertAccount(it) }
-        transactions.forEach { transactionDao.insertTransaction(it) }
     }
 }

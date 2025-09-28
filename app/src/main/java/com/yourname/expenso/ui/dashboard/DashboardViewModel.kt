@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yourname.expenso.data.TransactionRepository
 import com.yourname.expenso.model.Transaction
+import com.yourname.expenso.model.Account
+import com.yourname.expenso.model.Category
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,9 @@ data class DashboardUiState(
     val totalIncome: Double = 0.0,
     val totalExpense: Double = 0.0,
     val balance: Double = 0.0,
-    val transactions: List<Transaction> = emptyList()
+    val transactions: List<Transaction> = emptyList(),
+    val accounts: List<Account> = emptyList(),
+    val categories: List<Category> = emptyList()
 )
 
 @HiltViewModel
@@ -25,14 +29,20 @@ class DashboardViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<DashboardUiState> =
-        transactionRepository.getAllTransactions().map { transactions ->
+        kotlinx.coroutines.flow.combine(
+            transactionRepository.getAllTransactions(),
+            transactionRepository.getAllAccounts(),
+            transactionRepository.getAllCategories()
+        ) { transactions, accounts, categories ->
             val income = transactions.filter { it.type == "Income" }.sumOf { it.amount }
             val expense = transactions.filter { it.type == "Expense" }.sumOf { it.amount }
             DashboardUiState(
                 totalIncome = income,
                 totalExpense = expense,
                 balance = income - expense,
-                transactions = transactions
+                transactions = transactions,
+                accounts = accounts,
+                categories = categories
             )
         }.stateIn(
             scope = viewModelScope,
@@ -46,5 +56,9 @@ class DashboardViewModel @Inject constructor(
         }
     }
     
-
+    fun updateTransaction(transaction: Transaction) {
+        viewModelScope.launch {
+            transactionRepository.updateTransaction(transaction)
+        }
+    }
 }

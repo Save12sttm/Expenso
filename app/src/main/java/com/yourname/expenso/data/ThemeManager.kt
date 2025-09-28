@@ -17,14 +17,20 @@ enum class AppTheme {
     LIGHT, DARK, SYSTEM
 }
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "theme_preferences")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "app_preferences")
 
 @Singleton
-class ThemeManager @Inject constructor(
+class AppPreferencesManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    // Theme preferences
     private val themeKey = stringPreferencesKey("app_theme")
     private val notificationsKey = booleanPreferencesKey("notifications_enabled")
+    
+    // Profile preferences
+    private val profileNameKey = stringPreferencesKey("profile_name")
+    private val profileEmailKey = stringPreferencesKey("profile_email")
+    private val profileAvatarKey = stringPreferencesKey("profile_avatar")
 
     val theme: Flow<AppTheme> = context.dataStore.data.map { preferences ->
         when (preferences[themeKey]) {
@@ -47,6 +53,37 @@ class ThemeManager @Inject constructor(
     suspend fun setNotificationsEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[notificationsKey] = enabled
+        }
+    }
+    
+    // Profile methods
+    val profileName: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[profileNameKey] ?: "John Doe"
+    }
+    
+    val profileEmail: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[profileEmailKey] ?: "john.doe@example.com"
+    }
+    
+    val profileAvatar: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[profileAvatarKey] ?: "Person"
+    }
+    
+    suspend fun setProfileName(name: String) {
+        context.dataStore.edit { preferences ->
+            preferences[profileNameKey] = name
+        }
+    }
+    
+    suspend fun setProfileEmail(email: String) {
+        context.dataStore.edit { preferences ->
+            preferences[profileEmailKey] = email
+        }
+    }
+    
+    suspend fun setProfileAvatar(avatar: String) {
+        context.dataStore.edit { preferences ->
+            preferences[profileAvatarKey] = avatar
         }
     }
 }
