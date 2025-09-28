@@ -520,40 +520,153 @@ cd Expenso
 
 <img src="https://contrib.rocks/image?repo=Save12sttm/Expenso" alt="Contributors"/>
 
+<p>
+<img alt="Contributors" src="https://img.shields.io/github/contributors/Save12sttm/Expenso?style=for-the-badge&logo=github&logoColor=white&color=4CAF50"/>
+<img alt="Issues" src="https://img.shields.io/github/issues/Save12sttm/Expenso?style=for-the-badge&logo=github&logoColor=white&color=FF9800"/>
+<img alt="Pull Requests" src="https://img.shields.io/github/issues-pr/Save12sttm/Expenso?style=for-the-badge&logo=github&logoColor=white&color=2196F3"/>
+</p>
+
 </div>
 
 ### 🌟 **How to Contribute**
 
-1. **🍴 Fork** the repository
-2. **🌿 Create** your feature branch: `git checkout -b feature/AmazingFeature`
-3. **💾 Commit** your changes: `git commit -m 'Add some AmazingFeature'`
-4. **🚀 Push** to the branch: `git push origin feature/AmazingFeature`
-5. **🔄 Open** a Pull Request
+```bash
+# 1️⃣ Fork the repository on GitHub
+# Click the "Fork" button at the top right
+
+# 2️⃣ Clone your fork locally
+git clone https://github.com/YOUR_USERNAME/Expenso.git
+cd Expenso
+
+# 3️⃣ Create a new branch for your feature
+git checkout -b feature/amazing-feature
+
+# 4️⃣ Make your changes and commit
+git add .
+git commit -m "✨ Add amazing feature"
+
+# 5️⃣ Push to your fork
+git push origin feature/amazing-feature
+
+# 6️⃣ Create a Pull Request on GitHub
+# Go to your fork and click "New Pull Request"
+```
 
 ### 📋 **Contribution Guidelines**
 
 <table>
 <tr>
-<td width="50%">
+<td width="33%" align="center">
 
 **🐛 Bug Reports**
-- Use GitHub issue tracker
-- Include device & Android version
-- Provide reproduction steps
-- Add screenshots if applicable
+- Use [GitHub Issues](https://github.com/Save12sttm/Expenso/issues)
+- Include device info & Android version
+- Provide clear reproduction steps
+- Add screenshots/logs if applicable
+- Use bug report template
 
 </td>
-<td width="50%">
+<td width="33%" align="center">
 
 **✨ Feature Requests**
-- Check existing issues first
-- Describe feature clearly
-- Explain the use case
+- Check [existing issues](https://github.com/Save12sttm/Expenso/issues) first
+- Use feature request template
+- Describe the problem it solves
+- Provide mockups if UI-related
 - Consider implementation complexity
+
+</td>
+<td width="33%" align="center">
+
+**💻 Code Contributions**
+- Follow Kotlin coding standards
+- Write meaningful commit messages
+- Add tests for new features
+- Update documentation
+- Ensure CI/CD passes
 
 </td>
 </tr>
 </table>
+
+### 🎯 **Areas We Need Help With**
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="25%">
+<img src="https://img.shields.io/badge/-UI%2FUX-FF6B6B?style=for-the-badge&logo=figma&logoColor=white"/>
+<br><b>Design</b>
+<br>UI improvements, icons, animations
+</td>
+<td align="center" width="25%">
+<img src="https://img.shields.io/badge/-Features-4ECDC4?style=for-the-badge&logo=lightbulb&logoColor=white"/>
+<br><b>New Features</b>
+<br>Budget tracking, analytics, export
+</td>
+<td align="center" width="25%">
+<img src="https://img.shields.io/badge/-Testing-45B7D1?style=for-the-badge&logo=checkmarx&logoColor=white"/>
+<br><b>Quality Assurance</b>
+<br>Unit tests, UI tests, bug testing
+</td>
+<td align="center" width="25%">
+<img src="https://img.shields.io/badge/-Documentation-96CEB4?style=for-the-badge&logo=gitbook&logoColor=white"/>
+<br><b>Documentation</b>
+<br>Code docs, user guides, tutorials
+</td>
+</tr>
+</table>
+
+</div>
+
+### 🏆 **Recognition**
+
+**All contributors will be:**
+- 🌟 Featured in our README
+- 🎖️ Added to the contributors wall
+- 📧 Mentioned in release notes
+- 💝 Eligible for special contributor badges
+
+### 📝 **Code Style Guidelines**
+
+```kotlin
+// ✅ Good: Clear, descriptive naming
+class TransactionRepository @Inject constructor(
+    private val transactionDao: TransactionDao
+) {
+    suspend fun addTransaction(transaction: Transaction) {
+        transactionDao.insertTransaction(transaction)
+    }
+}
+
+// ✅ Good: Proper documentation
+/**
+ * Calculates the total balance across all accounts
+ * @return Total balance as Double
+ */
+fun calculateTotalBalance(): Double
+
+// ✅ Good: Meaningful commit messages
+// ✨ Add budget tracking feature
+// 🐛 Fix navigation issue in dashboard
+// 🎨 Improve transaction card design
+```
+
+### 🚀 **Development Setup**
+
+1. **Prerequisites**: Android Studio Hedgehog+, JDK 17+, Git
+2. **Clone & Setup**: Follow installation guide above
+3. **Build**: `./gradlew build`
+4. **Test**: `./gradlew test`
+5. **Run**: Use Android Studio or `./gradlew installDebug`
+
+### 🤔 **Need Help?**
+
+- 💬 [GitHub Discussions](https://github.com/Save12sttm/Expenso/discussions) - Ask questions
+- 📧 [Email](mailto:save.shaving@gmail.com) - Direct contact
+- 🐛 [Issues](https://github.com/Save12sttm/Expenso/issues) - Report bugs
+- 📖 [Wiki](https://github.com/Save12sttm/Expenso/wiki) - Documentation
 
 ---
 
@@ -562,12 +675,92 @@ cd Expenso
 <div align="center">
 
 <img src="https://img.shields.io/badge/License-MIT-FFD700?style=for-the-badge&logo=opensourceinitiative&logoColor=black"/>
+<img src="https://img.shields.io/badge/Open%20Source-❤️-FF6B6B?style=for-the-badge&logo=heart&logoColor=white"/>
+<img src="https://img.shields.io/badge/Free%20Forever-✨-4CAF50?style=for-the-badge&logo=infinity&logoColor=white"/>
 
 **This project is licensed under the MIT License**
 
-*Feel free to use, modify, and distribute!*
+</div>
 
-See the [LICENSE](LICENSE) file for details.
+### 🎆 **What This Means for You**
+
+<table>
+<tr>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/-Use-4CAF50?style=for-the-badge&logo=check&logoColor=white"/>
+<br><b>Commercial Use</b>
+<br>Use in commercial projects
+</td>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/-Modify-2196F3?style=for-the-badge&logo=edit&logoColor=white"/>
+<br><b>Modification</b>
+<br>Change and adapt the code
+</td>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/-Distribute-FF9800?style=for-the-badge&logo=share&logoColor=white"/>
+<br><b>Distribution</b>
+<br>Share and redistribute
+</td>
+<td width="25%" align="center">
+<img src="https://img.shields.io/badge/-Private-9C27B0?style=for-the-badge&logo=lock&logoColor=white"/>
+<br><b>Private Use</b>
+<br>Use for personal projects
+</td>
+</tr>
+</table>
+
+### 📜 **License Terms**
+
+```
+MIT License
+
+Copyright (c) 2024 A.K (Save12sttm)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIability, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+### ⚖️ **Simple Terms**
+
+**✅ You CAN:**
+- Use this app for any purpose (personal, commercial, educational)
+- Modify the source code to fit your needs
+- Distribute your modified versions
+- Include it in your own projects
+- Sell applications based on this code
+
+**📝 You MUST:**
+- Include the original copyright notice
+- Include the MIT license text
+- Give credit to the original author
+
+**❌ You CANNOT:**
+- Hold the author liable for any damages
+- Use the author's name to promote your derivative works
+- Remove or modify the license terms
+
+<div align="center">
+
+**💫 Questions about licensing?** 
+
+[Contact us](mailto:save.shaving@gmail.com) • [Read Full License](LICENSE) • [OSI MIT License](https://opensource.org/licenses/MIT)
+
+**🌟 This project is free and open source forever!**
 
 </div>
 

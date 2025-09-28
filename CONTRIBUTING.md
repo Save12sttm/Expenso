@@ -1,157 +1,123 @@
 # 🤝 Contributing to Expenso
 
-Thank you for your interest in contributing to Expenso! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Expenso! We welcome contributions from developers of all skill levels.
 
-## 🚀 Getting Started
+## 🚀 Quick Start
+
+1. **Fork** the repository
+2. **Clone** your fork: `git clone https://github.com/YOUR_USERNAME/Expenso.git`
+3. **Create** a branch: `git checkout -b feature/amazing-feature`
+4. **Make** your changes
+5. **Test** your changes
+6. **Commit**: `git commit -m "✨ Add amazing feature"`
+7. **Push**: `git push origin feature/amazing-feature`
+8. **Create** a Pull Request
+
+## 📋 Guidelines
+
+### Code Style
+- Follow Kotlin coding conventions
+- Use meaningful variable and function names
+- Add comments for complex logic
+- Keep functions small and focused
+
+### Commit Messages
+Use conventional commits with emojis:
+- `✨ feat: add new feature`
+- `🐛 fix: resolve bug`
+- `🎨 style: improve UI/UX`
+- `📝 docs: update documentation`
+- `🔧 refactor: improve code structure`
+
+### Pull Requests
+- Provide clear description of changes
+- Include screenshots for UI changes
+- Reference related issues
+- Ensure all tests pass
+- Keep PRs focused and small
+
+## 🎯 Areas We Need Help
+
+- **UI/UX Improvements**: Better designs, animations, accessibility
+- **New Features**: Budget tracking, analytics, export functionality
+- **Bug Fixes**: Report and fix issues
+- **Testing**: Write unit tests and UI tests
+- **Documentation**: Improve code docs and user guides
+
+## 🐛 Reporting Bugs
+
+1. Check if the bug already exists in [Issues](https://github.com/Save12sttm/Expenso/issues)
+2. Create a new issue with:
+   - Clear title and description
+   - Steps to reproduce
+   - Expected vs actual behavior
+   - Device info and Android version
+   - Screenshots if applicable
+
+## 💡 Suggesting Features
+
+1. Check [existing issues](https://github.com/Save12sttm/Expenso/issues) first
+2. Create a feature request with:
+   - Clear problem description
+   - Proposed solution
+   - Use cases and benefits
+   - Mockups if UI-related
+
+## 🏗️ Development Setup
 
 ### Prerequisites
-- Android Studio Hedgehog | 2023.1.1+
-- Android SDK 26+
-- Kotlin 1.9.23+
+- Android Studio Hedgehog 2023.1.1+
+- JDK 17+
+- Android SDK API 26+
 - Git
 
-### Development Setup
+### Setup Steps
+```bash
+# Clone the repository
+git clone https://github.com/Save12sttm/Expenso.git
+cd Expenso
 
-1. **Fork and Clone**
-   ```bash
-   git clone https://github.com/Save12sttm/Expenso.git
-   cd expenso
-   ```
+# Open in Android Studio
+# File → Open → Select Expenso folder
 
-2. **Create Feature Branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+# Build the project
+./gradlew build
 
-3. **Setup Development Environment**
-   - Open project in Android Studio
-   - Sync Gradle files
-   - Run tests to ensure everything works
+# Run tests
+./gradlew test
 
-## 📋 How to Contribute
-
-### 🐛 Bug Reports
-- Use the GitHub issue tracker
-- Include Android version, device model
-- Provide steps to reproduce
-- Include screenshots if applicable
-
-### ✨ Feature Requests
-- Check existing issues first
-- Describe the feature clearly
-- Explain the use case
-- Consider implementation complexity
-
-### 🔧 Code Contributions
-
-#### Code Style
-- Follow Kotlin coding conventions
-- Use meaningful variable names
-- Add comments for complex logic
-- Follow existing project structure
-
-#### Commit Guidelines
+# Install on device/emulator
+./gradlew installDebug
 ```
-type(scope): description
-
-feat(dashboard): add monthly spending chart
-fix(database): resolve transaction deletion bug
-docs(readme): update installation instructions
-```
-
-#### Pull Request Process
-1. Update documentation if needed
-2. Add tests for new features
-3. Ensure all tests pass
-4. Update CHANGELOG.md
-5. Request review from maintainers
-
-## 🏗️ Architecture Guidelines
-
-### MVVM Pattern
-- ViewModels handle UI logic
-- Repository manages data sources
-- Use Hilt for dependency injection
-
-### Database Changes
-- Create migration scripts for Room
-- Test migrations thoroughly
-- Update DAO interfaces accordingly
-
-### UI Components
-- Use Jetpack Compose
-- Follow Material 3 guidelines
-- Ensure responsive design
-- Add accessibility support
 
 ## 🧪 Testing
 
-### Unit Tests
-```bash
-./gradlew test
-```
+- Write unit tests for new features
+- Test on different screen sizes
+- Verify dark/light theme compatibility
+- Test with different Android versions
 
-### UI Tests
-```bash
-./gradlew connectedAndroidTest
-```
+## 📚 Resources
 
-### Code Coverage
-- Aim for >80% coverage
-- Focus on business logic
-- Test edge cases
+- [Kotlin Style Guide](https://kotlinlang.org/docs/coding-conventions.html)
+- [Android Development Best Practices](https://developer.android.com/guide)
+- [Jetpack Compose Guidelines](https://developer.android.com/jetpack/compose)
+- [Material Design 3](https://m3.material.io/)
 
-## 📝 Documentation
+## 🤔 Questions?
 
-- Update README.md for new features
-- Add KDoc comments for public APIs
-- Include code examples
-- Update architecture diagrams
-
-## 🎯 Areas for Contribution
-
-### High Priority
-- [ ] Biometric authentication
-- [ ] Cloud sync functionality
-- [ ] Advanced analytics
-- [ ] Widget support
-
-### Medium Priority
-- [ ] Multi-currency support
-- [ ] Budget planning
-- [ ] Recurring transactions
-- [ ] Data visualization improvements
-
-### Low Priority
-- [ ] Wear OS support
-- [ ] Voice commands
-- [ ] Machine learning insights
-- [ ] Social features
-
-## 🚫 What Not to Contribute
-
-- Breaking changes without discussion
-- Features that compromise security
-- Code that doesn't follow architecture
-- Untested functionality
-
-## 📞 Getting Help
-
-- **GitHub Discussions:** For general questions
-- **Issues:** For bugs and feature requests
-- **GitHub Issues:** https://github.com/Save12sttm/Expenso/issues
+- 💬 [GitHub Discussions](https://github.com/Save12sttm/Expenso/discussions)
+- 📧 [Email](mailto:save.shaving@gmail.com)
+- 🐛 [Issues](https://github.com/Save12sttm/Expenso/issues)
 
 ## 🏆 Recognition
 
-Contributors will be:
-- Listed in CONTRIBUTORS.md
+All contributors will be:
+- Featured in the README
+- Added to the contributors wall
 - Mentioned in release notes
-- Given credit in app about section
-
-## 📄 License
-
-By contributing, you agree that your contributions will be licensed under the MIT License.
+- Eligible for special badges
 
 ---
 
-**Happy Contributing! 🎉**
+**Thank you for making Expenso better! 🙏**
