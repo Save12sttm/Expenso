@@ -20,26 +20,64 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yourname.expenso.model.Account
+import com.yourname.expenso.ui.dashboard.DashboardViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageAccountsScreen(
     navController: NavController,
-    viewModel: AccountViewModel = hiltViewModel()
+    viewModel: AccountViewModel = hiltViewModel(),
+    dashboardViewModel: DashboardViewModel = hiltViewModel()
 ) {
     val accounts by viewModel.accounts.collectAsState()
+    val uiState by dashboardViewModel.uiState.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
     var showTransferDialog by remember { mutableStateOf(false) }
     var accountToEdit by remember { mutableStateOf<Account?>(null) }
     var accountToDelete by remember { mutableStateOf<Account?>(null) }
+    var isMultiSelectMode by remember { mutableStateOf(false) }
+    var selectedAccounts by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Manage Accounts") },
+                title = { 
+                    Text(
+                        if (isMultiSelectMode) 
+                            "Selected: ${selectedAccounts.size}" 
+                        else "Manage Accounts"
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (isMultiSelectMode) {
+                        if (selectedAccounts.isNotEmpty()) {
+                            IconButton(onClick = {
+                                selectedAccounts.forEach { accountId ->
+                                    accounts.find { it.id == accountId }?.let {
+                                        viewModel.deleteAccount(it)
+                                    }
+                                }
+                                selectedAccounts = emptySet()
+                                isMultiSelectMode = false
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete Selected")
+                            }
+                        }
+                        TextButton(onClick = {
+                            isMultiSelectMode = false
+                            selectedAccounts = emptySet()
+                        }) {
+                            Text("Cancel")
+                        }
+                    } else {
+                        TextButton(onClick = { isMultiSelectMode = true }) {
+                            Text("Select")
+                        }
                     }
                 }
             )
@@ -98,7 +136,7 @@ fun ManageAccountsScreen(
                 LazyColumn {
                     item {
                         Text(
-                            "Tap on an account to edit its balance. Swipe to delete.",
+                            "Tap account to edit balance.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(16.dp)
@@ -106,49 +144,96 @@ fun ManageAccountsScreen(
                     }
                     
                     items(accounts) { account ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 4.dp)
-                                .clickable { accountToEdit = account },
-                            elevation = CardDefaults.cardElevation(2.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
+                            if (isMultiSelectMode) {
+                                Checkbox(
+                                    checked = selectedAccounts.contains(account.id),
+                                    onCheckedChange = { isSelected ->
+                                        selectedAccounts = if (isSelected) {
+                                            selectedAccounts + account.id
+                                        } else {
+                                            selectedAccounts - account.id
+                                        }
+                                    },
+                                    modifier = Modifier.padding(start = 16.dp, end = 8.dp)
+                                )
+                            }
+                            
+                            Card(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                    .weight(1f)
+                                    .padding(horizontal = if (isMultiSelectMode) 0.dp else 16.dp, vertical = 4.dp)
+                                    .clickable { 
+                                        if (isMultiSelectMode) {
+                                            selectedAccounts = if (selectedAccounts.contains(account.id)) {
+                                                selectedAccounts - account.id
+                                            } else {
+                                                selectedAccounts + account.id
+                                            }
+                                        } else {
+                                            accountToEdit = account
+                                        }
+                                    },
+                                elevation = CardDefaults.cardElevation(2.dp)
                             ) {
-                                Column {
-                                    Text(
-                                        account.name,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        modifier = Modifier.padding(bottom = 4.dp)
-                                    )
-                                    Text(
-                                        account.type,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                                 Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        String.format("₹%.2f", account.balance),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = if (account.balance >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    IconButton(
-                                        onClick = { accountToDelete = account }
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = "Delete Account",
-                                            tint = MaterialTheme.colorScheme.error
+                                    Column {
+                                        Text(
+                                            account.name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            modifier = Modifier.padding(bottom = 4.dp)
                                         )
+                                        Text(
+                                            account.type,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        // Calculate account balance from transactions
+                                        val accountTransactions = remember(uiState.transactions, account.id) {
+                                            uiState.transactions.filter { it.accountId == account.id }
+                                        }
+                                        val accountIncome = accountTransactions.filter { it.type == "Income" }.sumOf { it.amount }
+                                        val accountExpense = accountTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
+                                        val calculatedAccountBalance = accountIncome - accountExpense
+                                        
+                                        Text(
+                                            String.format("₹%.2f", calculatedAccountBalance),
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = if (calculatedAccountBalance >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                        )
+                                        if (!isMultiSelectMode) {
+                                            Spacer(Modifier.width(8.dp))
+                                            IconButton(
+                                                onClick = { navController.navigate("account_transactions/${account.id}") }
+                                            ) {
+                                                Text(
+                                                    "📋",
+                                                    style = MaterialTheme.typography.titleMedium
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { accountToDelete = account }
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Delete Account",
+                                                    tint = MaterialTheme.colorScheme.error
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }

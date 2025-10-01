@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Enable hardware acceleration -->
+    <bool name="config_enable_hardware_acceleration">true</bool>
+    
+    <!-- Optimize for high refresh rate displays -->
+    <integer name="config_preferredRefreshRate">120</integer>
+    <integer name="config_fallbackRefreshRate">60</integer>
+</resources>

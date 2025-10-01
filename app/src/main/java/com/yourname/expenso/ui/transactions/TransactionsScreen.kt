@@ -5,6 +5,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -23,6 +24,7 @@ import com.yourname.expenso.ui.dashboard.EditTransactionDialog
 import com.yourname.expenso.model.Transaction
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +40,13 @@ fun TransactionsScreen(
     var selectedTransactions by remember { mutableStateOf(setOf<Int>()) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var transactionToEdit by remember { mutableStateOf<Transaction?>(null) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    
+
+    
+
+    
+
     
     val filteredTransactions = uiState.transactions.filter { transaction ->
         val matchesSearch = transaction.title.contains(searchQuery, ignoreCase = true)
@@ -92,11 +101,13 @@ fun TransactionsScreen(
             }
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+
         ) {
+            Column(modifier = Modifier.fillMaxSize()) {
             // Search Bar
             OutlinedTextField(
                 value = searchQuery,
@@ -153,7 +164,10 @@ fun TransactionsScreen(
                     .fillMaxSize()
                     .padding(horizontal = 16.dp)
             ) {
-                items(filteredTransactions) { transaction ->
+                items(
+                    items = filteredTransactions,
+                    key = { transaction -> "${transaction.id}-${transaction.date}" }
+                ) { transaction ->
                     MultiSelectTransactionItem(
                         transaction = transaction,
                         isMultiSelectMode = isMultiSelectMode,
@@ -187,6 +201,10 @@ fun TransactionsScreen(
                     }
                 }
             }
+            
+            }
+            
+
         }
         
         if (showDeleteDialog) {

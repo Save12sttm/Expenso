@@ -34,19 +34,22 @@ class DashboardViewModel @Inject constructor(
             transactionRepository.getAllAccounts(),
             transactionRepository.getAllCategories()
         ) { transactions, accounts, categories ->
-            val income = transactions.filter { it.type == "Income" }.sumOf { it.amount }
-            val expense = transactions.filter { it.type == "Expense" }.sumOf { it.amount }
+            val activeTransactions = transactions.filter { !it.isDeleted }
+            val income = activeTransactions.filter { it.type == "Income" }.sumOf { it.amount }
+            val expense = activeTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
+            val calculatedBalance = income - expense
+            
             DashboardUiState(
                 totalIncome = income,
                 totalExpense = expense,
-                balance = income - expense,
-                transactions = transactions,
+                balance = calculatedBalance,
+                transactions = activeTransactions,
                 accounts = accounts,
                 categories = categories
             )
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
+            started = SharingStarted.Eagerly,
             initialValue = DashboardUiState()
         )
 
@@ -59,6 +62,12 @@ class DashboardViewModel @Inject constructor(
     fun updateTransaction(transaction: Transaction) {
         viewModelScope.launch {
             transactionRepository.updateTransaction(transaction)
+        }
+    }
+    
+    fun refreshData() {
+        viewModelScope.launch {
+            transactionRepository.initializeDefaultData()
         }
     }
 }

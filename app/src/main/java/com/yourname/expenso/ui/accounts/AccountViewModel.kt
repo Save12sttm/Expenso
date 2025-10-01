@@ -37,6 +37,12 @@ class AccountViewModel @Inject constructor(
         }
     }
     
+    fun refreshData() {
+        viewModelScope.launch {
+            repository.initializeDefaultData()
+        }
+    }
+    
     fun deleteAccount(account: Account) {
         viewModelScope.launch {
             repository.deleteAccount(account)

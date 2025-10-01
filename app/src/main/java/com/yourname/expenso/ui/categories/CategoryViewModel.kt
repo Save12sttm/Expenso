@@ -30,4 +30,16 @@ class CategoryViewModel @Inject constructor(
             repository.deleteCategory(category)
         }
     }
+    
+    fun updateCategory(category: Category) {
+        viewModelScope.launch {
+            repository.updateCategory(category)
+        }
+    }
+    
+    fun refreshData() {
+        viewModelScope.launch {
+            repository.initializeDefaultData()
+        }
+    }
 }

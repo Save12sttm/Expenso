@@ -12,10 +12,13 @@ import com.yourname.expenso.ui.add_transaction.AddTransactionScreen
 import com.yourname.expenso.ui.categories.ManageCategoriesScreen
 
 import com.yourname.expenso.ui.dashboard.DashboardScreen
+import com.yourname.expenso.ui.dashboard.EnhancedDashboardScreen
 import com.yourname.expenso.ui.reports.ReportsScreen
 import com.yourname.expenso.ui.settings.RecentlyDeletedScreen
 import com.yourname.expenso.ui.settings.SettingsScreen
 import com.yourname.expenso.ui.transactions.TransactionsScreen
+import com.yourname.expenso.ui.accounts.AccountTransactionsScreen
+
 
 @Composable
 fun AppNavHost(
@@ -29,7 +32,7 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable(BottomNavItem.Dashboard.route) {
-            DashboardScreen(navController = navController, windowSizeClass = windowSizeClass)
+            DashboardScreen(navController = navController)
         }
         composable(BottomNavItem.Transactions.route) {
             TransactionsScreen(navController = navController)
@@ -59,6 +62,11 @@ fun AppNavHost(
         composable("reports") {
             ReportsScreen(navController = navController)
         }
+        composable("account_transactions/{accountId}") { backStackEntry ->
+            val accountId = backStackEntry.arguments?.getString("accountId")?.toIntOrNull() ?: 0
+            AccountTransactionsScreen(navController = navController, accountId = accountId)
+        }
+
 
     }
 }

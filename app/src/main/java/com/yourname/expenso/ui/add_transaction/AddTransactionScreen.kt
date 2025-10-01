@@ -28,6 +28,8 @@ private fun isAmountValid(amount: String): Boolean {
 private fun getCategoryEmoji(category: String): String {
     return when {
         category.contains("food", ignoreCase = true) -> "🍽️"
+        category.contains("sabji", ignoreCase = true) -> "🥬"
+        category.contains("grocery", ignoreCase = true) -> "🛒"
         category.contains("transport", ignoreCase = true) -> "🚗"
         category.contains("shop", ignoreCase = true) -> "🛍️"
         category.contains("bill", ignoreCase = true) -> "💵"
@@ -56,10 +58,11 @@ fun AddTransactionScreen(
     var expandedAccount by remember { mutableStateOf(false) }
     var isSaving by remember { mutableStateOf(false) }
     
-    // Set first account as default when accounts load
+    // Set UPI account as default when accounts load
     LaunchedEffect(accounts) {
         if (accounts.isNotEmpty() && selectedAccount.isEmpty()) {
-            selectedAccount = accounts.first().name
+            val upiAccount = accounts.find { it.name.equals("UPI", ignoreCase = true) }
+            selectedAccount = upiAccount?.name ?: accounts.first().name
         }
     }
     
@@ -70,7 +73,12 @@ fun AddTransactionScreen(
     
     LaunchedEffect(categories) {
         if (categories.isNotEmpty() && category == "General") {
-            category = categories.first().name
+            if (transactionType == "Expense") {
+                val sabjiCategory = categories.find { it.name.equals("Sabji", ignoreCase = true) }
+                category = sabjiCategory?.name ?: categories.first().name
+            } else {
+                category = categories.first().name
+            }
         }
     }
     

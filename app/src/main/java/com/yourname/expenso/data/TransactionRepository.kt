@@ -39,6 +39,7 @@ class TransactionRepository @Inject constructor(
     fun getAllCategories(): Flow<List<Category>> = categoryDao.getAllCategories()
     suspend fun insertCategory(category: Category) = categoryDao.insertCategory(category)
     suspend fun deleteCategory(category: Category) = categoryDao.deleteCategory(category)
+    suspend fun updateCategory(category: Category) = categoryDao.updateCategory(category)
     suspend fun getCategoryById(categoryId: Int): Category? = categoryDao.getCategoryById(categoryId)
 
     // Account Methods
@@ -69,9 +70,9 @@ class TransactionRepository @Inject constructor(
             val accountCount = accountDao.getAccountCount()
             if (accountCount == 0) {
                 val defaultAccounts = listOf(
-                    Account(name = "Cash", balance = 5000.0, type = "Cash"),
-                    Account(name = "Bank", balance = 25000.0, type = "Bank"),
-                    Account(name = "UPI", balance = 10000.0, type = "UPI")
+                    Account(name = "Cash", balance = 0.0, type = "Cash"),
+                    Account(name = "Bank", balance = 0.0, type = "Bank"),
+                    Account(name = "UPI", balance = 0.0, type = "UPI")
                 )
                 defaultAccounts.forEach { accountDao.insertAccount(it) }
             }
@@ -80,8 +81,10 @@ class TransactionRepository @Inject constructor(
             if (categoryCount == 0) {
                 val defaultCategories = listOf(
                     Category(name = "Food", icon = "🍽️"),
+                    Category(name = "Sabji", icon = "🥬"),
+                    Category(name = "Grocery", icon = "🛒"),
                     Category(name = "Transport", icon = "🚗"),
-                    Category(name = "Shopping", icon = "🛒"),
+                    Category(name = "Shopping", icon = "🛍️"),
                     Category(name = "Bills", icon = "💡"),
                     Category(name = "Entertainment", icon = "🎬"),
                     Category(name = "Health", icon = "🏥"),

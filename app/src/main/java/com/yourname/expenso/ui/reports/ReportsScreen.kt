@@ -38,7 +38,7 @@ fun ReportsScreen(
     
     val monthlyIncome = monthlyTransactions.filter { it.type == "Income" }.sumOf { it.amount }
     val monthlyExpense = monthlyTransactions.filter { it.type == "Expense" }.sumOf { it.amount }
-    val monthlyBalance = monthlyIncome - monthlyExpense
+    val monthlyBalance = uiState.balance
     
     val categoryBreakdown = monthlyTransactions
         .filter { it.type == "Expense" }

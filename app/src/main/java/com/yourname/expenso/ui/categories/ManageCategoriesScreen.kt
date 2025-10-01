@@ -28,14 +28,50 @@ fun ManageCategoriesScreen(
     val categories by viewModel.categories.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<com.yourname.expenso.model.Category?>(null) }
+    var categoryToEdit by remember { mutableStateOf<com.yourname.expenso.model.Category?>(null) }
+    var isMultiSelectMode by remember { mutableStateOf(false) }
+    var selectedCategories by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Manage Categories") },
+                title = { 
+                    Text(
+                        if (isMultiSelectMode) 
+                            "Selected: ${selectedCategories.size}" 
+                        else "Manage Categories"
+                    ) 
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (isMultiSelectMode) {
+                        if (selectedCategories.isNotEmpty()) {
+                            IconButton(onClick = {
+                                selectedCategories.forEach { categoryId ->
+                                    categories.find { it.id == categoryId }?.let {
+                                        viewModel.deleteCategory(it)
+                                    }
+                                }
+                                selectedCategories = emptySet()
+                                isMultiSelectMode = false
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete Selected")
+                            }
+                        }
+                        TextButton(onClick = {
+                            isMultiSelectMode = false
+                            selectedCategories = emptySet()
+                        }) {
+                            Text("Cancel")
+                        }
+                    } else {
+                        TextButton(onClick = { isMultiSelectMode = true }) {
+                            Text("Select")
+                        }
                     }
                 }
             )
@@ -57,52 +93,81 @@ fun ManageCategoriesScreen(
             }
             
             items(categories) { category ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .clickable { 
-                            // TODO: Implement category editing in future
-                        },
-                    elevation = CardDefaults.cardElevation(2.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    shape = MaterialTheme.shapes.medium
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                getCategoryEmoji(category.name),
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.width(12.dp))
-                        
-                        Text(
-                            text = category.name,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f)
+                    if (isMultiSelectMode) {
+                        Checkbox(
+                            checked = selectedCategories.contains(category.id),
+                            onCheckedChange = { isSelected ->
+                                selectedCategories = if (isSelected) {
+                                    selectedCategories + category.id
+                                } else {
+                                    selectedCategories - category.id
+                                }
+                            },
+                            modifier = Modifier.padding(start = 16.dp, end = 8.dp)
                         )
-                        
-                        IconButton(
-                            onClick = { categoryToDelete = category }
+                    }
+                    
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = if (isMultiSelectMode) 0.dp else 16.dp, vertical = 4.dp)
+                            .clickable { 
+                                if (isMultiSelectMode) {
+                                    selectedCategories = if (selectedCategories.contains(category.id)) {
+                                        selectedCategories - category.id
+                                    } else {
+                                        selectedCategories + category.id
+                                    }
+                                } else {
+                                    categoryToEdit = category
+                                }
+                            },
+                        elevation = CardDefaults.cardElevation(2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete Category",
-                                tint = MaterialTheme.colorScheme.error
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shape = MaterialTheme.shapes.medium
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    getCategoryEmoji(category.name),
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
+                            Text(
+                                text = category.name,
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.weight(1f)
                             )
+                            
+                            if (!isMultiSelectMode) {
+                                IconButton(
+                                    onClick = { categoryToDelete = category }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete Category",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -152,7 +217,95 @@ fun ManageCategoriesScreen(
                 }
             )
         }
+        
+        categoryToEdit?.let { category ->
+            EditCategoryDialog(
+                category = category,
+                onDismiss = { categoryToEdit = null },
+                onConfirm = { name, icon ->
+                    viewModel.updateCategory(category.copy(name = name, icon = icon))
+                    categoryToEdit = null
+                }
+            )
+        }
     }
+}
+
+@Composable
+fun EditCategoryDialog(
+    category: com.yourname.expenso.model.Category,
+    onDismiss: () -> Unit, 
+    onConfirm: (String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(category.name) }
+    var selectedIcon by remember { mutableStateOf(category.icon) }
+    
+    val iconOptions = listOf(
+        "⭐" to "Star"
+    )
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Category") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Category Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Select Icon:", style = MaterialTheme.typography.bodyMedium)
+                LazyRow(modifier = Modifier.padding(top = 8.dp)) {
+                    items(iconOptions) { (icon, label) ->
+                        Card(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clickable { selectedIcon = icon },
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (selectedIcon == icon) 
+                                    MaterialTheme.colorScheme.primaryContainer 
+                                else MaterialTheme.colorScheme.surface
+                            ),
+                            elevation = CardDefaults.cardElevation(2.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    icon,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    label,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { 
+                    if (name.isNotBlank()) {
+                        onConfirm(name, selectedIcon)
+                    }
+                },
+                enabled = name.isNotBlank()
+            ) {
+                Text("Update")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable

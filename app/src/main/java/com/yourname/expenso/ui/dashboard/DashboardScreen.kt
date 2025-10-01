@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -28,22 +29,34 @@ import java.util.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yourname.expenso.model.Transaction
+import kotlinx.coroutines.delay
 
 import java.text.SimpleDateFormat
 import java.util.*
+import com.yourname.expenso.ui.theme.stableKey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     navController: NavController,
-    windowSizeClass: WindowSizeClass,
-    viewModel: DashboardViewModel = hiltViewModel(),
-
+    viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isExpandedScreen = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isExpandedScreen = false
     var selectedMonth by remember { mutableStateOf(Calendar.getInstance().get(Calendar.MONTH)) }
     var selectedYear by remember { mutableStateOf(Calendar.getInstance().get(Calendar.YEAR)) }
+    var isRefreshing by remember { mutableStateOf(false) }
+    
+
+    
+    LaunchedEffect(uiState) {
+        if (isRefreshing) {
+            delay(1000) // Show refresh for 1 second
+            isRefreshing = false
+        }
+    }
+    
+
     
 
     Scaffold(
@@ -77,7 +90,12 @@ fun DashboardScreen(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+
+        ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 // Enhanced Summary Cards Row
                 item {
@@ -139,7 +157,10 @@ fun DashboardScreen(
                 }
                 
                 // Recent Transactions
-                items(uiState.transactions.take(5)) { transaction ->
+                items(
+                    items = uiState.transactions.take(5),
+                    key = { transaction -> stableKey(transaction.id, transaction.date) }
+                ) { transaction ->
                     TransactionItem(
                         transaction = transaction,
                         onDelete = viewModel::softDeleteTransaction,
